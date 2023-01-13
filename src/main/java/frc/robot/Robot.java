@@ -7,8 +7,10 @@ package frc.robot;
 import java.io.File;
 import java.io.FileReader;
 import java.io.BufferedReader;
+import java.io.IOException;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DataLogManager;
@@ -36,10 +38,9 @@ public class Robot extends TimedRobot {
       try {
         BufferedReader br = new BufferedReader(new FileReader(commitFile));
         gitCommitHash = br.readLine().trim();
+        br.close();
       } catch (IOException e) {
         gitCommitHash = "[error reading commit.txt]";
-      } finally {
-        br.close();
       }
     }
     return gitCommitHash;
@@ -51,10 +52,9 @@ public class Robot extends TimedRobot {
       try {
         BufferedReader br = new BufferedReader(new FileReader(branchFile));
         gitBranch = br.readLine().trim();
+        br.close();
       } catch (IOException e) {
         gitBranch = "[error reading branch.txt]";
-      } finally {
-        br.close();
       }
     }
     return gitBranch;
@@ -66,10 +66,9 @@ public class Robot extends TimedRobot {
       try {
         BufferedReader br = new BufferedReader(new FileReader(tagsFile));
         gitTags = br.readLine().trim();
+        br.close();
       } catch (IOException e) {
         gitTags = "[error reading tags.txt]";
-      } finally {
-        br.close();
       }
     }
     return gitTags;
