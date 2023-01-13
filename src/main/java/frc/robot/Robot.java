@@ -4,9 +4,14 @@
 
 package frc.robot;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.BufferedReader;
+
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.DataLogManager;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -20,15 +25,83 @@ public class Robot extends TimedRobot {
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
+  public final File deployDir = Filesystem.getDeployDirectory();
+  private String gitCommitHash;
+  private String gitBranch;
+  private String gitTags;
+
+  public String getGitCommitHash() {
+    if (gitCommitHash == null) {
+      File commitFile = new File(deployDir, "commit.txt");
+      try {
+        BufferedReader br = new BufferedReader(new FileReader(commitFile));
+        gitCommitHash = br.readLine().trim();
+      } catch (IOException e) {
+        gitCommitHash = "[error reading commit.txt]";
+      } finally {
+        br.close();
+      }
+    }
+    return gitCommitHash;
+  }
+
+  public String getGitBranch() {
+    if (gitBranch == null) {
+      File branchFile = new File(deployDir, "branch.txt");
+      try {
+        BufferedReader br = new BufferedReader(new FileReader(branchFile));
+        gitBranch = br.readLine().trim();
+      } catch (IOException e) {
+        gitBranch = "[error reading branch.txt]";
+      } finally {
+        br.close();
+      }
+    }
+    return gitBranch;
+  }
+
+  public String getGitTags() {
+    if (gitTags == null) {
+      File tagsFile = new File(deployDir, "tags.txt");
+      try {
+        BufferedReader br = new BufferedReader(new FileReader(tagsFile));
+        gitTags = br.readLine().trim();
+      } catch (IOException e) {
+        gitTags = "[error reading tags.txt]";
+      } finally {
+        br.close();
+      }
+    }
+    return gitTags;
+  }
+
+  public void logGitInfo() {
+    String gCommit = getGitCommitHash();
+    String gBranch = getGitBranch();
+    String gTags = getGitTags();
+    DataLogManager.log("****************************************");
+    DataLogManager.log("Software version: git commit hash [" + gCommit +
+                       "] (branch " + gBranch + ")");
+    if (gTags.equals("")) {
+      DataLogManager.log("  (untagged)");
+    } else {
+      DataLogManager.log("  tagged version: [" + gTags + "]");
+    }
+    DataLogManager.log("****************************************");
+  }
+
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
    */
   @Override
   public void robotInit() {
+    DataLogManager.start();
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
+
+    logGitInfo();
   }
 
   /**
