@@ -38,7 +38,7 @@ public class Robot extends TimedRobot {
     String returnValue;
     try {
       BufferedReader br = new BufferedReader(new FileReader(gitFile));
-      fileFirstLine = br.readLine();
+      String fileFirstLine = br.readLine();
       if (fileFirstLine == null) {
         returnValue = "";
       } else {
@@ -101,12 +101,12 @@ public class Robot extends TimedRobot {
                        "] (branch " + gBranch + ")");
     String addenda = "";
     if (gTags.equals("")) {
-      addenda += "  (untagged)");
+      addenda += "  (untagged)";
     } else {
       addenda += "  tagged version: [" + gTags + "]";
     }
     if (gMods.equals("")) {
-      addenda += "  (unmodified)");
+      addenda += "  (unmodified)";
     } else {
       addenda = "  MODIFIED FROM GIT -- NOT CHECKED IN!";
     }
