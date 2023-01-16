@@ -198,7 +198,8 @@ public class Robot extends TimedRobot {
     // raw encoder velocity * 75/600 = RPM
     encoderVelocity = m_talonfx1.getSelectedSensorVelocity();
     SmartDashboard.putNumber("Encoder position", encoderPosition);
-    SmartDashboard.putNumber("Encoder velocity", encoderVelocity);
+    SmartDashboard.putNumber("Encoder velocity (units/100ms)", encoderVelocity);
+    SmartDashboard.putNumber("Encoder velocity (RPM)", encoderVelocity*75.0/600);
   
   }
 
