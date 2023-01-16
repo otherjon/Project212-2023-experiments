@@ -15,6 +15,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DataLogManager;
 
+import com.ctre.phoenix.motorcontrol.can.TalonFX;
+
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
  * each mode, as described in the TimedRobot documentation. If you change the name of this class or
@@ -33,6 +35,11 @@ public class Robot extends TimedRobot {
   private String gitTags;
   private String gitModifiedFiles;
 
+  private final TalonFX m_talonfx1 = new TalonFX(4);
+  private double encoderPosition;
+  private double encoderVelocity;
+
+_tal.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);  
   public String getFirstLineOfGitInfoFile(String filename) {
     File gitFile = new File(deployDir, filename);
     String returnValue;
@@ -154,6 +161,12 @@ public class Robot extends TimedRobot {
     m_autoSelected = m_chooser.getSelected();
     // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
     System.out.println("Auto selected: " + m_autoSelected);
+
+    // If using a sensor other than IntegratedSensor, do the following, as per
+    // https://docs.ctre-phoenix.com/en/stable/ch14_MCSensor.html#software-select-sensor
+    //
+    //m_talonfx1.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
+
   }
 
   /** This function is called periodically during autonomous. */
@@ -165,9 +178,28 @@ public class Robot extends TimedRobot {
         break;
       case kDefaultAuto:
       default:
-        // Put default auto code here
+        defaultAutoPeriodic();
         break;
     }
+  }
+
+  public void defaultAutoPeriodic() {
+    m_talonfx1.set(ControlMode.PercentOutput, 0.10);
+
+    // For info on reading the Talon FX built-in encoder, see:
+    // https://docs.ctre-phoenix.com/en/stable/ch14_MCSensor.html#sensor-check-with-motor-drive
+    encoderPosition = m_talonfx1.getSelectedSensorPosition();
+
+    // encoder velocity is given "encoder units per 100 ms"
+    // Talon FX integrated sensor has 2048 encoder units per shaft revolution
+    // To convert to RPM:
+    // raw encoder velocity (enc units / tenths-of-second) * (10 tenths-of-second/sec) * (1 rev / 2048 enc units) * (60 sec/min) = rev/min (RPM)
+    // raw encoder velocity * 10 / 2048 * 60 = RPM
+    // raw encoder velocity * 75/600 = RPM
+    encoderVelocity = m_talonfx1.getSelectedSensorVelocity();
+    SmartDashboard.putNumber("Encoder position", encoderPosition);
+    SmartDashboard.putNumber("Encoder velocity", encoderVelocity);
+  
   }
 
   /** This function is called once when teleop is enabled. */
