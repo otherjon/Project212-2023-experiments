@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DataLogManager;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 
 /**
@@ -35,11 +36,10 @@ public class Robot extends TimedRobot {
   private String gitTags;
   private String gitModifiedFiles;
 
-  private final TalonFX m_talonfx1 = new TalonFX(4);
+  private final TalonFX m_talonfx1 = new TalonFX(5);
   private double encoderPosition;
   private double encoderVelocity;
 
-_tal.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);  
   public String getFirstLineOfGitInfoFile(String filename) {
     File gitFile = new File(deployDir, filename);
     String returnValue;
