@@ -155,7 +155,26 @@ tasks.register("writeTagsIfAny") {
    ).text = commitHash
 }
 
+tasks.register("writeModifiedFilesIfAny") {
+   def stdout = new ByteArrayOutputStream()
+
+   exec {
+     commandLine "git", "ls-files", "--modified"
+     standardOutput = stdout
+     errorOutput = new ByteArrayOutputStream()
+     ignoreExitValue = true
+   }
+
+   def commitHash = stdout.toString().trim()
+
+   new File(
+      projectDir.toString() + "/src/main/deploy",
+      "modified.txt"
+   ).text = commitHash
+}
+
 
 deploy.targets.roborio.artifacts.frcStaticFileDeploy.dependsOn(writeBranchName)
 deploy.targets.roborio.artifacts.frcStaticFileDeploy.dependsOn(writeCommitHash)
 deploy.targets.roborio.artifacts.frcStaticFileDeploy.dependsOn(writeTagsIfAny)
+deploy.targets.roborio.artifacts.frcStaticFileDeploy.dependsOn(writeModifiedFilesIfAny)

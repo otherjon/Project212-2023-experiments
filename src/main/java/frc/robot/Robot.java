@@ -31,15 +31,30 @@ public class Robot extends TimedRobot {
   private String gitCommitHash;
   private String gitBranch;
   private String gitTags;
+  private String gitModifiedFiles;
 
+  public String getFirstLineOfGitInfoFile(String filename) {
+    File gitFile = new File(deployDir, filename);
+    String returnValue;
+    try {
+      BufferedReader br = new BufferedReader(new FileReader(gitFile));
+      fileFirstLine = br.readLine();
+      if (fileFirstLine == null) {
+        returnValue = "";
+      } else {
+        returnValue = fileFirstLine.trim();
+      }
+      br.close();
+    } catch (IOException e) {
+      returnValue = null;
+    }
+    return returnValue;
+  }
+ 
   public String getGitCommitHash() {
     if (gitCommitHash == null) {
-      File commitFile = new File(deployDir, "commit.txt");
-      try {
-        BufferedReader br = new BufferedReader(new FileReader(commitFile));
-        gitCommitHash = br.readLine().trim();
-        br.close();
-      } catch (IOException e) {
+      gitCommitHash = getFirstLineOfGitInfoFile("commit.txt");
+      if (gitCommitHash == null) {
         gitCommitHash = "[error reading commit.txt]";
       }
     }
@@ -48,12 +63,8 @@ public class Robot extends TimedRobot {
 
   public String getGitBranch() {
     if (gitBranch == null) {
-      File branchFile = new File(deployDir, "branch.txt");
-      try {
-        BufferedReader br = new BufferedReader(new FileReader(branchFile));
-        gitBranch = br.readLine().trim();
-        br.close();
-      } catch (IOException e) {
+      gitBranch = getFirstLineOfGitInfoFile("branch.txt");
+      if (gitBranch == null) {
         gitBranch = "[error reading branch.txt]";
       }
     }
@@ -62,30 +73,45 @@ public class Robot extends TimedRobot {
 
   public String getGitTags() {
     if (gitTags == null) {
-      File tagsFile = new File(deployDir, "tags.txt");
-      try {
-        BufferedReader br = new BufferedReader(new FileReader(tagsFile));
-        gitTags = br.readLine().trim();
-        br.close();
-      } catch (IOException e) {
+      gitTags = getFirstLineOfGitInfoFile("tags.txt");
+      if (gitTags == null) {
         gitTags = "[error reading tags.txt]";
       }
     }
     return gitTags;
   }
 
+  public String getGitModifiedFiles() {
+    if (gitModifiedFiles == null) {
+      gitModifiedFiles = getFirstLineOfGitInfoFile("mods.txt");
+      if (gitModifiedFiles == null) {
+        gitModifiedFiles = "[error reading mods.txt]";
+      }
+    }
+    return gitModifiedFiles;
+  }
+
   public void logGitInfo() {
     String gCommit = getGitCommitHash();
     String gBranch = getGitBranch();
     String gTags = getGitTags();
+    String gMods = getGitModifiedFiles();
     DataLogManager.log("****************************************");
     DataLogManager.log("Software version: git commit hash [" + gCommit +
                        "] (branch " + gBranch + ")");
+    String addenda = "";
     if (gTags.equals("")) {
-      DataLogManager.log("  (untagged)");
+      addenda += "  (untagged)");
     } else {
-      DataLogManager.log("  tagged version: [" + gTags + "]");
+      addenda += "  tagged version: [" + gTags + "]";
     }
+    if (gMods.equals("")) {
+      addenda += "  (unmodified)");
+    } else {
+      addenda = "  MODIFIED FROM GIT -- NOT CHECKED IN!";
+    }
+
+    DataLogManager.log(addenda);
     DataLogManager.log("****************************************");
   }
 
