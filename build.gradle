@@ -169,7 +169,7 @@ tasks.register("writeModifiedFilesIfAny") {
 
    new File(
       projectDir.toString() + "/src/main/deploy",
-      "modified.txt"
+      "mods.txt"
    ).text = commitHash
 }
 
