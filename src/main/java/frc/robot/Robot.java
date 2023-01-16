@@ -15,6 +15,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DataLogManager;
 
+import com.kauailabs.navx.frc.AHRS;
+
+
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
  * each mode, as described in the TimedRobot documentation. If you change the name of this class or
@@ -32,6 +35,14 @@ public class Robot extends TimedRobot {
   private String gitBranch;
   private String gitTags;
   private String gitModifiedFiles;
+  private AHRS navx = new AHRS();
+
+  private double accel_x;
+  private double accel_y;
+  private double accel_z;
+  private double yaw;
+  private double pitch;
+  private double roll;
 
   public String getFirstLineOfGitInfoFile(String filename) {
     File gitFile = new File(deployDir, filename);
@@ -165,9 +176,26 @@ public class Robot extends TimedRobot {
         break;
       case kDefaultAuto:
       default:
-        // Put default auto code here
+        defaultAutoPeriodic();
         break;
     }
+  }
+
+  public void defaultAutoPeriodic() {
+    accel_x = navx.getWorldLinearAccelX();
+    accel_y = navx.getWorldLinearAccelY();
+    accel_z = navx.getWorldLinearAccelZ();
+    
+    yaw = navx.getYaw();
+    pitch = navx.getPitch();
+    roll = navx.getRoll();
+    SmartDashboard.putNumber("X Accel", accel_x);
+    SmartDashboard.putNumber("Y Accel", accel_y);
+    SmartDashboard.putNumber("Z Accel", accel_z);
+    SmartDashboard.putNumber("Yaw", yaw);
+    SmartDashboard.putNumber("Pitch", pitch);
+    SmartDashboard.putNumber("Roll", roll);
+  
   }
 
   /** This function is called once when teleop is enabled. */
