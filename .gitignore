@@ -25,3 +25,13 @@ hs_err_pid*
 # Text editor backup files
 *~
 
+# build files
+build/
+.gradle/
+
+# generated files of Git information
+src/main/deploy/commit.txt
+src/main/deploy/branch.txt
+src/main/deploy/tags.txt
+src/main/deploy/mods.txt
+
