@@ -4,16 +4,15 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
-import frc.robot.Constants;
-import static frc.robot.Constants.CanBusIDs;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import static frc.robot.Constants.CANBusIDs;
 import static frc.robot.Constants.Drivetrain;
 import frc.robot.commands.Balance1ApproachCS;
 import frc.robot.commands.Balance2DriveUpRamp;
@@ -60,11 +59,11 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * @return (SequentialCommandGroup) command group for balancing on the
    * charging station
    */
-  public SequentialCommandGroup balanceOnChargingStationCommand() {
-    SequentialCommandGroup cmd = new Balance1ApproachCS()
-      .andThen(new Balance2DriveUpRamp())
-      .andThen(new Balance3CenterOnPlatform())
-      .withName("BalanceOnChargingStation");
+  public SequentialCommandGroup balanceOnChargingStationCommand(
+      DrivetrainSubsystem drive, NavXSubsystem navx) {
+    SequentialCommandGroup cmd = new Balance1ApproachCS(drive, navx)
+      .andThen(new Balance2DriveUpRamp(drive, navx))
+      .andThen(new Balance3CenterOnPlatform(drive, navx));
     return cmd;
   }
 
@@ -75,11 +74,12 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * joysticks.
 
    */
-  public SequentialCommandGroup driveInTeleopModeCommand(XboxController stick) {
+  public Command driveInTeleopModeCommand(DrivetrainSubsystem drive, NavXSubsystem navx, CommandXboxController stick) {
+    // TODO: add requirements to command!
     return new InstantCommand(() -> driveWithJoysticks(stick));
   }
 
-  public void driveWithJoysticks(XboxController stick) {
+  public void driveWithJoysticks(CommandXboxController stick) {
     double maxFwd = Drivetrain.MAX_FORWARD_SPEED;
     double maxTurn = Drivetrain.MAX_TURN_SPEED;
     // right trigger is forward, left trigger is reverse

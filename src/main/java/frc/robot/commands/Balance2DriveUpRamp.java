@@ -51,6 +51,6 @@ public class Balance2DriveUpRamp extends CommandBase {
   @Override
   public boolean isFinished() {
     // finished when we're minimally tilted front-to-back (within +- 3 degrees)
-    return m_navx.getPitch() < 3.0 and m_navx.getPitch() > -3.0;
+    return (m_navx.getPitch() < 3.0 && m_navx.getPitch() > -3.0);
   }
 }

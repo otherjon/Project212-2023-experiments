@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.kauailabs.navx.frc.AHRS;
@@ -44,7 +45,7 @@ public class NavXSubsystem extends SubsystemBase {
    * @return (boolean) true if and only if the sensor calibration has completed
    */
   public boolean isCalibrated() {
-    return navx.isCalibrated();
+    return !navx.isCalibrating();
   }
 
   /**
@@ -57,6 +58,9 @@ public class NavXSubsystem extends SubsystemBase {
     return navx.isConnected();
   }
 
+  public double getPitch() {
+    return navx.getPitch();
+  }
   private void updateSensorVariables() {
     // Update private variables using data from the sensor
     accel_x = navx.getWorldLinearAccelX();
