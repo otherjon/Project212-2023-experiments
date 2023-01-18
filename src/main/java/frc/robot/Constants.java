@@ -16,4 +16,14 @@ public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
+  public static class CANBusIDs {
+    public static final int LEFT_FRONT_MOTOR  = 1;
+    public static final int RIGHT_FRONT_MOTOR = 12;
+    public static final int LEFT_REAR_MOTOR   = 0;
+    public static final int RIGHT_REAR_MOTOR  = 15;
+  }
+  public static class Drivetrain {
+    public static final double MAX_FORWARD_SPEED = 0.8;
+    public static final double MAX_TURN_SPEED = 0.8;
+  }
 }

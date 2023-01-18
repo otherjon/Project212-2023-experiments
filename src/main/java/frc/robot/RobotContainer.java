@@ -7,7 +7,9 @@ package frc.robot;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
-import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.GitInfoSubsystem;
+import frc.robot.subsystems.NavXSubsystem;
+import frc.robot.subsystems.DrivetrainSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -20,16 +22,23 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
+  private final GitInfoSubsystem m_gitInfo = new GitInfoSubsystem();
+  private final NavXSubsystem m_navx = new NavXSubsystem();
+  private final DrivetrainSubsystem m_drive = new DrivetrainSubsystem();
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
 
+  // Command instances
+  private final autoCmd = m_drive.balanceOnChargingStationCommand();
+  private final teleopCmd = m_drive.driveInTeleopModeCommand();
+  
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
     configureBindings();
+    logGitInfo();
   }
 
   /**
@@ -58,6 +67,48 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return Autos.exampleAuto(m_exampleSubsystem);
+    //return Autos.exampleAuto(m_exampleSubsystem);
+    return autoCmd;
+  }
+
+  /**
+   * Use this to pass the teleop command to the main {@link Robot} class.
+   *
+   * @return the command to run in teleop
+   */
+  public Command getTeleopCommand() {
+    return teleopCmd;
+  }
+
+  /**
+   * Log information from the GitInfoSubsystem to the console.
+   */
+  public void logGitInfo() {
+    String gCommit = m_gitInfo.commitHash();
+    String gBranch = m_gitInfo.branch();
+    String gTags = m_gitInfo.tags();
+    String gMods = m_gitInfo.modifiedFiles();
+    if (gMods == "") {
+      // No modified files on the robot computer -- good!
+      DataLogManager.log("========================================");
+      DataLogManager.log("Software version: git commit hash [" + gCommit +
+                         "] (branch " + gBranch + ")");
+      if (gTags.equals("")) {
+        DataLogManager.log("  (untagged)");
+      } else {
+        DataLogManager.log("  tagged version: [" + gTags + "]");
+      }
+      DataLogManager.log("========================================");
+    } else {
+      // Uh-oh, some files have been modified locally!
+      // This means that tags and commit hashes are invalid.
+      // And if this isn't a short-term experiment or a competition emergency,
+      //   then someone on the software team is being very naughty!
+      DataLogManager.log("=========!!==!!==!!==!!==!!==!!=========");
+      DataLogManager.log("Software version: LOCALLY MODIFIED CODE");
+      DataLogManager.log("  originally based off branch " + gBranch +
+                         ", commit " + gCommit);
+      DataLogManager.log("=========!!==!!==!!==!!==!!==!!=========");
+    }
   }
 }
