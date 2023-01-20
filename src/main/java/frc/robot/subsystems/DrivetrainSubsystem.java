@@ -4,37 +4,69 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj.math.PIDController;
+import edu.wpi.first.wpilibj2.command.PIDSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import static frc.robot.Constants.CANBusIDs;
 import static frc.robot.Constants.Drivetrain;
+import static frc.robot.Constants.ChargeStation;
 import frc.robot.commands.Balance1ApproachCS;
 import frc.robot.commands.Balance2DriveUpRamp;
 import frc.robot.commands.Balance3CenterOnPlatform;
 
-public class DrivetrainSubsystem extends SubsystemBase {
+public class DrivetrainSubsystem extends PIDSubsystem {
   /** Creates a new DrivetrainSubsystem. */
-  private final WPI_TalonSRX leftFront;
-  private final WPI_TalonSRX rightFront;
-  private final WPI_TalonSRX leftRear;
-  private final WPI_TalonSRX rightRear;
-
+  private final WPI_TalonFX leftFront;
+  private final WPI_TalonFX rightFront;
+  private final WPI_TalonFX leftRear;
+  private final WPI_TalonFX rightRear;
   private final DifferentialDrive drive;
 
-  public DrivetrainSubsystem() {
-    leftFront = new WPI_TalonSRX(CANBusIDs.LEFT_FRONT_MOTOR);
+  private double lfEncPos;
+  private double rfEncPos;
+  private double lrEncPos;
+  private double rrEncPos;
+  private double avgEncoderPositionRaw;
+  private double avgEncoderPositionInches;
+  private double avgEncoderVelocityRaw;
+  private double avgEncoderVelocityFeetPerSec;
+
+  private PIDController controller;
+  private static DrivetrainSubsystem instance;
+  private double setpoint;
+
+  public static DrivetrainSubsystem get() {
+    if (instance == null) {
+      PIDController ctlr = new PIDController(
+          ChargeStation.kP, ChargeStation.kI, ChargeStation.kD);
+      instance = new DrivetrainSubsystem(ctlr);
+    }
+    return instance;
+  }
+
+  /**
+   * You probably want to call the static factory method get() instead of
+   * creating a new instance of DrivetrainSubsystem...
+   */
+  public DrivetrainSubsystem(PIDController ctlr) {
+    controller = ctlr;
+    disable();
+    setpoint = 0.0;
+
+    leftFront = new WPI_TalonFX(CANBusIDs.LEFT_FRONT_MOTOR);
     leftFront.setInverted(true);
-    rightFront = new WPI_TalonSRX(CANBusIDs.RIGHT_FRONT_MOTOR);
+    rightFront = new WPI_TalonFX(CANBusIDs.RIGHT_FRONT_MOTOR);
     rightFront.setInverted(false);
-    leftRear = new WPI_TalonSRX(CANBusIDs.LEFT_REAR_MOTOR);
+    leftRear = new WPI_TalonFX(CANBusIDs.LEFT_REAR_MOTOR);
     leftRear.setInverted(true);
-    rightRear = new WPI_TalonSRX(CANBusIDs.RIGHT_REAR_MOTOR);
+    rightRear = new WPI_TalonFX(CANBusIDs.RIGHT_REAR_MOTOR);
     rightRear.setInverted(false);
 
     leftRear.follow(leftFront);
@@ -42,14 +74,72 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     drive = new DifferentialDrive(leftFront, rightFront);
 
-    SmartDashboard.putNumber("Drivetrain Distance (Feet)", 0);
-    SmartDashboard.putNumber("Left Encoder Distance (Inches)", 0);
-    SmartDashboard.putNumber("Right Encoder Distance (Inches)", 0);
+    SmartDashboard.putNumber("LF Encoder Pos (Raw)", 0);
+    SmartDashboard.putNumber("RF Encoder Pos (Raw)", 0);
+    SmartDashboard.putNumber("LR Encoder Pos (Raw)", 0);
+    SmartDashboard.putNumber("RR Encoder Pos (Raw)", 0);
+    SmartDashboard.putNumber("Avg Encoder Pos (Raw)", 0);
+    SmartDashboard.putNumber("LF Encoder Pos (Inches)", 0);
+    SmartDashboard.putNumber("RF Encoder Pos (Inches)", 0);
+    SmartDashboard.putNumber("LR Encoder Pos (Inches)", 0);
+    SmartDashboard.putNumber("RR Encoder Pos (Inches)", 0);
+    SmartDashboard.putNumber("Avg Encoder Pos (Inches)", 0);
+    SmartDashboard.putNumber("Avg Encoder Speed (Raw)", 0);
+    SmartDashboard.putNumber("Avg Encoder Speed (Inches)", 0);
+  }
+
+  public void updateEncoderData() {
+    // This method will be called once per scheduler run
+    lfEncPos = leftFront.getSelectedSensorPosition();
+    rfEncPos = rightFront.getSelectedSensorPosition();
+    lrEncPos = leftRear.getSelectedSensorPosition();
+    rrEncPos = rightRear.getSelectedSensorPosition();
+    avgEncoderPositionRaw = (lfEncPos + rfEncPos + lrEncPos + rrEncPos) / 4.0;
+
+    /*
+     * Talon FX integrated sensor has 2048 encoder units per shaft revolution
+     * motor-to-wheel gear ratio = ?
+     * wheel diameter = 6 inches
+     * wheel circumference = 6*PI inches
+     * Theoretical: pos_inches = pos_raw / 2048 / GearRatio * 6*PI = ___
+     * Empirical: We measured the robot going ___ inches when the encoder
+     *     reading increased by ___ -> pos_inches = pos_raw * __/__
+     */
+    double encoderUnitsPerInch = 10865.0;
+    avgEncoderPositionInches = avgEncoderPositionRaw / encoderUnitsPerInch;
+
+    avgEncoderVelocityRaw =
+      (leftFront.getSelectedSensorVelocity() +
+       rightFront.getSelectedSensorVelocity() +
+       leftRear.getSelectedSensorVelocity() +
+       rightRear.getSelectedSensorVelocity()) / 4.0;
+    /*
+     * Raw encoder velocity is given in "encoder units per 100 ms"
+     * To convert to inches per second:
+     *    raw encoder velocity (enc units / tenths-of-second) *
+     *      (10 tenths-of-second/sec) *
+     *      (1 inch / encoderUnitsPerInch enc units)
+     *    = inches per second
+     * raw encoder velocity * 10 / encoderUnitsPerInch = inches/sec
+     * raw encoder velocity * 10 / encoderUnitsPerInch / 12 = feet/sec
+     */
+    avgEncoderVelocityFeetPerSec =
+      avgEncoderVelocityRaw * 10.0 / encoderUnitsPerInch / 12.0;
+
+    SmartDashboard.putNumber("LF Encoder Pos (Raw)", lfEncPos);
+    SmartDashboard.putNumber("RF Encoder Pos (Raw)", rfEncPos);
+    SmartDashboard.putNumber("LR Encoder Pos (Raw)", lrEncPos);
+    SmartDashboard.putNumber("RR Encoder Pos (Raw)", rrEncPos);
+    SmartDashboard.putNumber("Avg Encoder Pos (Raw)", avgEncoderPositionRaw);
+    SmartDashboard.putNumber("Avg Encoder Pos (Inches)", Math.round(10.0*avgEncoderPositionInches)/10.0);
+    SmartDashboard.putNumber("Avg Encoder Speed (Raw)", avgEncoderVelocityRaw);
+    SmartDashboard.putNumber("Avg Encoder Speed (ft/sec)", Math.round(100.0*avgEncoderVelocityFeetPerSec)/100.0);
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    updateEncoderData();
   }
 
   /**
@@ -63,7 +153,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
       DrivetrainSubsystem drive, NavXSubsystem navx) {
     SequentialCommandGroup cmd = new Balance1ApproachCS(drive, navx)
       .andThen(new Balance2DriveUpRamp(drive, navx))
-      .andThen(new Balance3CenterOnPlatform(drive, navx));
+      .andThen(new Balance3DriveForwardNInches(drive, ChargeStation.INCHES_PAST_LEVELING))
+      .andThen(new Balance4HoldPosition(drive));
     return cmd;
   }
 
@@ -75,8 +166,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
    */
   public Command driveInTeleopModeCommand(DrivetrainSubsystem drive, NavXSubsystem navx, CommandXboxController stick) {
-    // TODO: add requirements to command!
-    return new InstantCommand(() -> driveWithJoysticks(stick));
+    return new InstantCommand(() -> driveWithJoysticks(stick), drive, navx);
   }
 
   public void driveWithJoysticks(CommandXboxController stick) {
@@ -96,8 +186,38 @@ public class DrivetrainSubsystem extends SubsystemBase {
     drive.arcadeDrive(rate, 0.0);
   }
 
+  public double avgEncoderPositionInches() {
+    return avgEncoderPositionInches;
+  }
+
+  public void setCoasting(boolean coasting) {
+    NeutralMode mode;
+    if(coasting) {
+      mode = NeutralMode.Coast;
+    } else {
+      mode = NeutralMode.Brake;
+    }
+    leftFront.setNeutralMode(mode);
+    rightFront.setNeutralMode(mode);
+    leftRear.setNeutralMode(mode);
+    rightRear.setNeutralMode(mode);
+  }
+
   public void stop() {
     drive.stopMotor();
   }
 
+  /**
+   * Method required for PID control as a PIDSubsystem subclass
+   */
+  public void useOutput(double value) {
+    driveStraightAtFixedRate(value);
+  }
+
+  /**
+   * Method required for PID control as a PIDSubsystem subclass
+   */
+  public double getMeasurement() {
+    return avgEncoderPositionInches();
+  }
 }

@@ -26,4 +26,10 @@ public final class Constants {
     public static final double MAX_FORWARD_SPEED = 0.8;
     public static final double MAX_TURN_SPEED = 0.8;
   }
+  public static class ChargeStation {
+    // constants relating to the task of balancing on the charging station
+    public static final double INCHES_PAST_LEVELING = 1.0;
+    public static final double kP = 0.4;
+    public static final double kI = 0.0;
+    public static final double kD = 0.0;
 }
