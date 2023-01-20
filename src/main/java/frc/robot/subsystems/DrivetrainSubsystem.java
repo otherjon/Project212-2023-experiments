@@ -9,7 +9,7 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.math.PIDController;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.PIDSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -19,7 +19,8 @@ import static frc.robot.Constants.Drivetrain;
 import static frc.robot.Constants.ChargeStation;
 import frc.robot.commands.Balance1ApproachCS;
 import frc.robot.commands.Balance2DriveUpRamp;
-import frc.robot.commands.Balance3CenterOnPlatform;
+import frc.robot.commands.Balance3DriveForwardNInches;
+import frc.robot.commands.Balance4HoldPosition;
 
 public class DrivetrainSubsystem extends PIDSubsystem {
   /** Creates a new DrivetrainSubsystem. */
@@ -56,6 +57,7 @@ public class DrivetrainSubsystem extends PIDSubsystem {
    * creating a new instance of DrivetrainSubsystem...
    */
   public DrivetrainSubsystem(PIDController ctlr) {
+    super(ctlr);
     controller = ctlr;
     disable();
     setpoint = 0.0;
@@ -210,7 +212,7 @@ public class DrivetrainSubsystem extends PIDSubsystem {
   /**
    * Method required for PID control as a PIDSubsystem subclass
    */
-  public void useOutput(double value) {
+  public void useOutput(double value, double setpoint) {
     driveStraightAtFixedRate(value);
   }
 

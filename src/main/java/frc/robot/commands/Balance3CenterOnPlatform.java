@@ -5,7 +5,6 @@
 package frc.robot.commands;
 
 import frc.robot.subsystems.DrivetrainSubsystem;
-import frc.robot.subsystems.NavXSubsystem;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
@@ -29,19 +28,16 @@ public class Balance3CenterOnPlatform extends CommandBase {
   public static final double DRIVE_TIME = 2.0;
   public static final double DRIVE_SPEED = 0.2;
   private final DrivetrainSubsystem m_drive;
-  private final NavXSubsystem m_navx;
   private Timer m_timer;
 
   /**
    * Creates a new command.
    *
    * @param drive The DriveSubsystem used by this command.
-   * @param navx The NavXSubsystem used by this command.
    */
-  public Balance3CenterOnPlatform(DrivetrainSubsystem drive, NavXSubsystem navx) {
+  public Balance3CenterOnPlatform(DrivetrainSubsystem drive) {
     m_drive = drive;
-    m_navx = navx;
-    addRequirements(drive, navx);    // declare subsystem dependencies
+    addRequirements(drive);    // declare subsystem dependencies
     m_timer = new Timer();
   }
 
