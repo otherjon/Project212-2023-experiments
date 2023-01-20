@@ -4,9 +4,10 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj.DataLogManager;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.NavXSubsystem;
-import edu.wpi.first.wpilibj2.command.CommandBase;
 
 /** Balance on the Charging Station (CS): Part 1
  *
@@ -30,11 +31,14 @@ public class Balance1ApproachCS extends CommandBase {
     m_drive = drive;
     m_navx = navx;
     addRequirements(drive, navx);    // declare subsystem dependencies
+    DataLogManager.log("=== [DEBUG] instantiated Balance1ApproachCS command");
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    DataLogManager.log("=== [DEBUG] initialized Balance1ApproachCS command");
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
@@ -44,7 +48,9 @@ public class Balance1ApproachCS extends CommandBase {
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    DataLogManager.log("=== [DEBUG] ended Balance1ApproachCS command");
+  }
 
   // Returns true when the command should end.
   @Override

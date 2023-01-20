@@ -23,7 +23,6 @@ import frc.robot.commands.Balance3DriveForwardNInches;
 import frc.robot.commands.Balance4HoldPosition;
 
 public class DrivetrainSubsystem extends PIDSubsystem {
-  /** Creates a new DrivetrainSubsystem. */
   private final WPI_TalonFX leftFront;
   private final WPI_TalonFX rightFront;
   private final WPI_TalonFX leftRear;
@@ -59,9 +58,11 @@ public class DrivetrainSubsystem extends PIDSubsystem {
   public DrivetrainSubsystem(PIDController ctlr) {
     super(ctlr);
     controller = ctlr;
-    disable();
+    disable();  // start in manual mode, not controlled by PID controller
     setpoint = 0.0;
 
+    // Default rotation direction is counter-clockwise
+    // Left motors are inverted, right motors are not
     leftFront = new WPI_TalonFX(CANBusIDs.LEFT_FRONT_MOTOR);
     leftFront.setInverted(true);
     rightFront = new WPI_TalonFX(CANBusIDs.RIGHT_FRONT_MOTOR);

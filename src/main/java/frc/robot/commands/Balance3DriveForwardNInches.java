@@ -4,8 +4,9 @@
 
 package frc.robot.commands;
 
-import frc.robot.subsystems.DrivetrainSubsystem;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj.DataLogManager;
+import frc.robot.subsystems.DrivetrainSubsystem;
 
 /** Balance on the Charging Station (CS): Part 3
  *
@@ -31,13 +32,15 @@ public class Balance3DriveForwardNInches extends CommandBase {
   public Balance3DriveForwardNInches(DrivetrainSubsystem drive, double inches) {
     m_drive = drive;
     addRequirements(drive);    // declare subsystem dependencies
-    encoderInitialReadingInches = m_drive.avgEncoderPositionInches();
-    encoderTargetReadingInches = encoderInitialReadingInches + inches;
+    DataLogManager.log("=== [DEBUG] instantiated Balance3DriveForwardNInches command");
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    encoderInitialReadingInches = m_drive.avgEncoderPositionInches();
+    encoderTargetReadingInches = encoderInitialReadingInches + inches;
+    DataLogManager.log("=== [DEBUG] initialized Balance3DriveForwardNInches command");
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -49,6 +52,7 @@ public class Balance3DriveForwardNInches extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    DataLogManager.log("=== [DEBUG] ended Balance3DriveForwardNInches command");
   }
 
   // Returns true when the command should end.
