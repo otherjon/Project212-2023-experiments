@@ -20,7 +20,7 @@ import frc.robot.subsystems.DrivetrainSubsystem;
 public class Balance4HoldPosition extends PIDCommand {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final DrivetrainSubsystem m_drive;
-  private final double encoderInitialReadingInches;
+  private double encoderInitialReadingInches;
 
   /**
    * Creates a new command.

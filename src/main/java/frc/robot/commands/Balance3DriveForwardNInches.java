@@ -20,8 +20,9 @@ public class Balance3DriveForwardNInches extends CommandBase {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   public static final double DRIVE_SPEED = 0.2;
   private final DrivetrainSubsystem m_drive;
-  private final double encoderInitialReadingInches;
-  private final double encoderTargetReadingInches;
+  private double encoderInitialReadingInches;
+  private double inchesForward;
+  private double encoderTargetReadingInches;
 
   /**
    * Creates a new command.
@@ -31,6 +32,7 @@ public class Balance3DriveForwardNInches extends CommandBase {
    */
   public Balance3DriveForwardNInches(DrivetrainSubsystem drive, double inches) {
     m_drive = drive;
+    inchesForward = inches;
     addRequirements(drive);    // declare subsystem dependencies
     DataLogManager.log("=== [DEBUG] instantiated Balance3DriveForwardNInches command");
   }
@@ -39,7 +41,7 @@ public class Balance3DriveForwardNInches extends CommandBase {
   @Override
   public void initialize() {
     encoderInitialReadingInches = m_drive.avgEncoderPositionInches();
-    encoderTargetReadingInches = encoderInitialReadingInches + inches;
+    encoderTargetReadingInches = encoderInitialReadingInches + inchesForward;
     DataLogManager.log("=== [DEBUG] initialized Balance3DriveForwardNInches command");
   }
 
