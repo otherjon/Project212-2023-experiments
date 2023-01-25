@@ -89,6 +89,7 @@ public class DrivetrainSubsystem extends PIDSubsystem {
     SmartDashboard.putNumber("Avg Encoder Pos (Inches)", 0);
     SmartDashboard.putNumber("Avg Encoder Speed (Raw)", 0);
     SmartDashboard.putNumber("Avg Encoder Speed (Inches)", 0);
+    SmartDashboard.putData(this);
   }
 
   public void updateEncoderData() {
@@ -168,8 +169,8 @@ public class DrivetrainSubsystem extends PIDSubsystem {
    * joysticks.
 
    */
-  public Command driveInTeleopModeCommand(DrivetrainSubsystem drive, NavXSubsystem navx, CommandXboxController stick) {
-    return new InstantCommand(() -> driveWithJoysticks(stick), drive, navx);
+  public Command driveInTeleopModeCommand(DrivetrainSubsystem drive, CommandXboxController stick) {
+    return new InstantCommand(() -> driveWithJoysticks(stick), drive);
   }
 
   public void driveWithJoysticks(CommandXboxController stick) {

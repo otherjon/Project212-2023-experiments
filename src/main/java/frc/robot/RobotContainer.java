@@ -33,12 +33,11 @@ public class RobotContainer {
 
   // Command instances
   private final Command autoCmd = m_drive.balanceOnChargingStationCommand(m_drive, m_navx);
-  private final Command teleopCmd = m_drive.driveInTeleopModeCommand(m_drive, m_navx, m_driverController);
+  private final Command teleopCmd = m_drive.driveInTeleopModeCommand(m_drive, m_driverController);
   
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // Configure the trigger bindings
-    configureBindings();
+    configureBindings();  // bind triggers (controller button presses) to commands
     logGitInfo();
   }
 
@@ -52,16 +51,13 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    //new Trigger(m_exampleSubsystem::exampleCondition)
-    //    .onTrue(new ExampleCommand(m_exampleSubsystem));
-
-    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-    //m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
     // Cancel all commands in progress when the Xbox controller's X button is pressed
     m_driverController.x().onTrue(new InstantCommand(
+
         () -> CommandScheduler.getInstance().cancelAll()));
+    // Run the charging station auto-balance procedure when the Xbox controller's A button is pressed
+    m_driverController.a().onTrue(
+        m_drive.balanceOnChargingStationCommand(m_drive, m_navx));
   }
 
   /**
@@ -70,8 +66,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
-    //return Autos.exampleAuto(m_exampleSubsystem);
     return autoCmd;
   }
 

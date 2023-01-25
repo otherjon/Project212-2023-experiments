@@ -29,13 +29,10 @@ public class NavXSubsystem extends SubsystemBase {
    *
    * @return (CommandBase) a command to run calibration
    */
-  public CommandBase calibrate() {
+  public CommandBase calibrateCommand() {
     // Inline construction of command goes here.
     // Subsystem::RunOnce implicitly requires `this` subsystem.
-    return runOnce(
-        () -> {
-          navx.calibrate();
-        });
+    return runOnce(() -> { navx.calibrate(); });
   }
 
   /**
@@ -43,9 +40,10 @@ public class NavXSubsystem extends SubsystemBase {
    * completed.
    *
    * @return (boolean) true if and only if the sensor calibration has completed
+   * and the sensor is no longer still calibrating
    */
   public boolean isCalibrated() {
-    return !navx.isCalibrating();
+    return ! navx.isCalibrating();
   }
 
   /**
@@ -58,9 +56,10 @@ public class NavXSubsystem extends SubsystemBase {
     return navx.isConnected();
   }
 
-  public double getPitch() {
-    return navx.getPitch();
-  }
+  public double getYaw()   { return yaw; }
+  public double getPitch() { return pitch; }
+  public double getRoll()  { return roll; }
+
   private void updateSensorVariables() {
     // Update private variables using data from the sensor
     accel_x = navx.getWorldLinearAccelX();
