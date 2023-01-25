@@ -58,7 +58,6 @@ public class DrivetrainSubsystem extends PIDSubsystem {
   public DrivetrainSubsystem(PIDController ctlr) {
     super(ctlr);
     controller = ctlr;
-    disable();  // start in manual mode, not controlled by PID controller
     setpoint = 0.0;
 
     // Default rotation direction is counter-clockwise
@@ -76,6 +75,7 @@ public class DrivetrainSubsystem extends PIDSubsystem {
     rightRear.follow(rightFront);
 
     drive = new DifferentialDrive(leftFront, rightFront);
+    disable();  // start in manual mode, not controlled by PID controller
 
     SmartDashboard.putNumber("LF Encoder Pos (Raw)", 0);
     SmartDashboard.putNumber("RF Encoder Pos (Raw)", 0);
@@ -89,7 +89,7 @@ public class DrivetrainSubsystem extends PIDSubsystem {
     SmartDashboard.putNumber("Avg Encoder Pos (Inches)", 0);
     SmartDashboard.putNumber("Avg Encoder Speed (Raw)", 0);
     SmartDashboard.putNumber("Avg Encoder Speed (Inches)", 0);
-    SmartDashboard.putData(this);
+    SmartDashboard.putData("Drivetrain Subsystem", this);
   }
 
   public void updateEncoderData() {
