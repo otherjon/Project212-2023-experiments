@@ -33,5 +33,6 @@ build/
 src/main/deploy/commit.txt
 src/main/deploy/branch.txt
 src/main/deploy/tags.txt
-src/main/deploy/mods.txt
+src/main/deploy/extra-local-commits.txt
+src/main/deploy/extra-remote-commits.txt
 

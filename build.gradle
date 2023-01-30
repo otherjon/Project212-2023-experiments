@@ -173,8 +173,46 @@ tasks.register("writeModifiedFilesIfAny") {
    ).text = commitHash
 }
 
+tasks.register("writeExtraLocalCommits") {
+   def stdout = new ByteArrayOutputStream()
+
+   exec {
+     commandLine "git", "rev-list", "--count", "@{u}..HEAD"
+     standardOutput = stdout
+     errorOutput = new ByteArrayOutputStream()
+     ignoreExitValue = true
+   }
+
+   def commitHash = stdout.toString().trim()
+
+   new File(
+      projectDir.toString() + "/src/main/deploy",
+      "extra-local-commits.txt"
+   ).text = commitHash
+}
+
+tasks.register("writeExtraRemoteCommits") {
+   def stdout = new ByteArrayOutputStream()
+
+   exec {
+     commandLine "git", "rev-list", "--count", "HEAD..@{u}"
+     standardOutput = stdout
+     errorOutput = new ByteArrayOutputStream()
+     ignoreExitValue = true
+   }
+
+   def commitHash = stdout.toString().trim()
+
+   new File(
+      projectDir.toString() + "/src/main/deploy",
+      "extra-remote-commits.txt"
+   ).text = commitHash
+}
+
 
 deploy.targets.roborio.artifacts.frcStaticFileDeploy.dependsOn(writeBranchName)
 deploy.targets.roborio.artifacts.frcStaticFileDeploy.dependsOn(writeCommitHash)
 deploy.targets.roborio.artifacts.frcStaticFileDeploy.dependsOn(writeTagsIfAny)
 deploy.targets.roborio.artifacts.frcStaticFileDeploy.dependsOn(writeModifiedFilesIfAny)
+deploy.targets.roborio.artifacts.frcStaticFileDeploy.dependsOn(writeExtraLocalCommits)
+deploy.targets.roborio.artifacts.frcStaticFileDeploy.dependsOn(writeExtraRemoteCommits)
