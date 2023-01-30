@@ -42,6 +42,8 @@ public class LEDSubsystem extends SubsystemBase {
     SmartDashboard.putNumber(pwmSetting);
     SmartDashboard.putData(incrementLEDPatternCommand());
     SmartDashboard.putData(decrementLEDPatternCommand());
+    SmartDashboard.putData(bigIncrementLEDPatternCommand());
+    SmartDashboard.putData(bigDecrementLEDPatternCommand());
   }
 
   public CommandBase doNothingCommand() {
@@ -63,6 +65,22 @@ public class LEDSubsystem extends SubsystemBase {
   }
 
   /**
+   * Factory method for command to increment selected LED pattern by 10.
+   *
+   * @return a command to increment the LED pattern
+   */
+  public CommandBase bigIncrementLEDPatternCommand() {
+    return runOnce(
+        () -> {
+          if (pwmSetting < 0.79) {
+            pwmSetting += 0.2;
+          } else {
+            pwmSetting = 0.99;
+          }
+        });
+  }
+
+  /**
    * Factory method for command to decrement selected LED pattern.
    *
    * @return a command to decrement the LED pattern
@@ -72,6 +90,22 @@ public class LEDSubsystem extends SubsystemBase {
         () -> {
           if (pwmSetting > -0.99) {
             pwmSetting -= 0.02;
+          }
+        });
+  }
+
+  /**
+   * Factory method for command to decrement selected LED pattern by 10.
+   *
+   * @return a command to decrement the LED pattern
+   */
+  public CommandBase bigDecrementLEDPatternCommand() {
+    return runOnce(
+        () -> {
+          if (pwmSetting > -0.79) {
+            pwmSetting -= 0.2;
+          } else {
+            pwmSetting = -0.99;
           }
         });
   }
