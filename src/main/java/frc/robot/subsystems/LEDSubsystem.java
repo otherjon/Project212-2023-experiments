@@ -7,7 +7,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
-import edu.wpi.first.wpilibj.SmartDashboard;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The Blinkin is controlled via PWM similarly to a Spark motor controller.
@@ -20,9 +20,6 @@ import edu.wpi.first.wpilibj.SmartDashboard;
  * See pages 14-17 of the Blinkin user manual:
  * https://www.revrobotics.com/content/docs/REV-11-1105-UM.pdf
  */
-public class Blinkin extends Spark {}
-
-int LED_CONTROLLER_PWM_PORT = 0;
 
 public class LEDSubsystem extends SubsystemBase {
   /**
@@ -32,6 +29,10 @@ public class LEDSubsystem extends SubsystemBase {
    * Blinkin user manual (linked from the page above):
    * https://www.revrobotics.com/content/docs/REV-11-1105-UM.pdf
    */
+  class Blinkin extends Spark {
+    public Blinkin(int pwmPort) { super(pwmPort); }
+  }
+  
   public Blinkin ledController;
   public double pwmSetting; // see user manual for PWM values
 
@@ -39,7 +40,7 @@ public class LEDSubsystem extends SubsystemBase {
   public LEDSubsystem(int controller_pwm_port) {
     ledController = new Blinkin(controller_pwm_port);
     pwmSetting = -0.99;
-    SmartDashboard.putNumber(pwmSetting);
+    SmartDashboard.putNumber("Blinkin value", pwmSetting);
     SmartDashboard.putData(incrementLEDPatternCommand());
     SmartDashboard.putData(decrementLEDPatternCommand());
     SmartDashboard.putData(bigIncrementLEDPatternCommand());
