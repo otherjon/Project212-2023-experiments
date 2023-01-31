@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -41,10 +42,10 @@ public class LEDSubsystem extends SubsystemBase {
     ledController = new Blinkin(controller_pwm_port);
     pwmSetting = -0.99;
     SmartDashboard.putNumber("Blinkin value", pwmSetting);
-    SmartDashboard.putData(incrementLEDPatternCommand());
-    SmartDashboard.putData(decrementLEDPatternCommand());
-    SmartDashboard.putData(bigIncrementLEDPatternCommand());
-    SmartDashboard.putData(bigDecrementLEDPatternCommand());
+    SmartDashboard.putData("LED+1", incrementLEDPatternCommand());
+    SmartDashboard.putData("LED-1", decrementLEDPatternCommand());
+    SmartDashboard.putData("LED+10", bigIncrementLEDPatternCommand());
+    SmartDashboard.putData("LED-10", bigDecrementLEDPatternCommand());
   }
 
   public CommandBase doNothingCommand() {
@@ -59,6 +60,7 @@ public class LEDSubsystem extends SubsystemBase {
   public CommandBase incrementLEDPatternCommand() {
     return runOnce(
         () -> {
+          DataLogManager.log("LED+1 command");
           if (pwmSetting < 0.99) {
             pwmSetting += 0.02;
           }
@@ -73,6 +75,7 @@ public class LEDSubsystem extends SubsystemBase {
   public CommandBase bigIncrementLEDPatternCommand() {
     return runOnce(
         () -> {
+          DataLogManager.log("LED+10 command");
           if (pwmSetting < 0.79) {
             pwmSetting += 0.2;
           } else {
@@ -89,6 +92,7 @@ public class LEDSubsystem extends SubsystemBase {
   public CommandBase decrementLEDPatternCommand() {
     return runOnce(
         () -> {
+          DataLogManager.log("LED-1 command");
           if (pwmSetting > -0.99) {
             pwmSetting -= 0.02;
           }
@@ -103,6 +107,7 @@ public class LEDSubsystem extends SubsystemBase {
   public CommandBase bigDecrementLEDPatternCommand() {
     return runOnce(
         () -> {
+          DataLogManager.log("LED-10 command");
           if (pwmSetting > -0.79) {
             pwmSetting -= 0.2;
           } else {
@@ -114,6 +119,7 @@ public class LEDSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     ledController.set(pwmSetting);
+    SmartDashboard.putNumber("Blinkin value", pwmSetting);
   }
 
   @Override
