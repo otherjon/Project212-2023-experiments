@@ -4,9 +4,10 @@
 
 package frc.robot.commands;
 
-import frc.robot.subsystems.DrivetrainSubsystem;
-import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.Constants;
+import frc.robot.subsystems.DrivetrainSubsystem;
 
 /** Balance on the Charging Station (CS): Part 3
  *
@@ -25,44 +26,45 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
  */
 public class Balance3CenterOnPlatform extends CommandBase {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-  public static final double DRIVE_TIME = 2.0;
-  public static final double DRIVE_SPEED = 0.2;
+  public final double encoderStartVal, encoderTargetVal;
   private final DrivetrainSubsystem m_drive;
-  private Timer m_timer;
 
   /**
-   * Creates a new command.
+   * Constructs the new command.
    *
    * @param drive The DriveSubsystem used by this command.
    */
   public Balance3CenterOnPlatform(DrivetrainSubsystem drive) {
     m_drive = drive;
     addRequirements(drive);    // declare subsystem dependencies
-    m_timer = new Timer();
+    encoderStartVal = drive.avgEncoderPositionInches();
+    encoderTargetVal = encoderStartVal + m_drive.inchesToEncoderUnits(
+      Constants.ChargeStation.INCHES_PAST_LEVELING);
+    DataLogManager.log("=== [DEBUG] instantiated Balance3CenterOnPlatform command");
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_timer.start();
+    DataLogManager.log("=== [DEBUG] initialized Balance3CenterOnPlatform command");
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_drive.driveStraightAtFixedRate(DRIVE_SPEED);
+    m_drive.driveStraightAtFixedRate(Constants.ChargeStation.DRIVE_SPEED);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_timer.stop();
+    DataLogManager.log("=== [DEBUG] finished Balance3CenterOnPlatform command");
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
     // finished when the elapsed time reaches the threshold
-    return m_timer.get() >= DRIVE_TIME;
+    return m_drive.avgEncoderPositionInches() >= encoderTargetVal;
   }
 }

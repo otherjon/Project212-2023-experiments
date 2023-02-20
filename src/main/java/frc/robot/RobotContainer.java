@@ -28,7 +28,7 @@ public class RobotContainer {
   private final DrivetrainSubsystem m_drive = DrivetrainSubsystem.get();
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final static CommandXboxController m_driverController =
+  public final static CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
 
   // Command instances
@@ -55,6 +55,10 @@ public class RobotContainer {
     m_driverController.x().onTrue(new InstantCommand(
 
         () -> CommandScheduler.getInstance().cancelAll()));
+
+    // Y button puts robot in teleop mode
+    m_driverController.y().onTrue(teleopCmd);
+
     // Run the charging station auto-balance procedure when the Xbox controller's A button is pressed
     m_driverController.a().onTrue(
         m_drive.balanceOnChargingStationCommand(m_drive, m_navx));

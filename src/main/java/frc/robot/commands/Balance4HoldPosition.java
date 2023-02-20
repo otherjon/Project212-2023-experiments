@@ -44,7 +44,8 @@ public class Balance4HoldPosition extends PIDCommand {
     encoderInitialReadingInches = m_drive.avgEncoderPositionInches();
     m_drive.setCoasting(false);  // this helps us hold position
     m_drive.setSetpoint(m_drive.getMeasurement()); // returns value in inches
-    m_drive.enable();  // turn on PID control
+    // TODO: uncomment the following line
+    //m_drive.enable();  // turn on PID control
     DataLogManager.log("=== [DEBUG] initialized Balance4HoldPosition command");
   }
 

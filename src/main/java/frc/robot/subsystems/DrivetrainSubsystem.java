@@ -9,6 +9,7 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.PIDSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -25,16 +26,21 @@ import frc.robot.commands.Balance3DriveForwardNInches;
 import frc.robot.commands.Balance4HoldPosition;
 
 public class DrivetrainSubsystem extends PIDSubsystem {
-  private final WPI_TalonFX leftFront;
-  private final WPI_TalonFX rightFront;
-  private final WPI_TalonFX leftRear;
-  private final WPI_TalonFX rightRear;
+  /*
+   * Left- and right-side gearboxes each are driven by two motors, at the top
+   * and bottom of the gearboxes.  Power is transferred to wheels by chains
+   * from there.  But this is why the motors are "top" and "bottom".
+   */
+  private final WPI_TalonFX leftTop;
+  private final WPI_TalonFX rightTop;
+  private final WPI_TalonFX leftBottom;
+  private final WPI_TalonFX rightBottom;
   private final DifferentialDrive drive;
 
-  private double lfEncPos;
-  private double rfEncPos;
-  private double lrEncPos;
-  private double rrEncPos;
+  private double ltEncPos;
+  private double rtEncPos;
+  private double lbEncPos;
+  private double rbEncPos;
   private double avgEncoderPositionRaw;
   private double avgEncoderPositionInches;
   private double avgEncoderVelocityRaw;
@@ -43,6 +49,17 @@ public class DrivetrainSubsystem extends PIDSubsystem {
   private PIDController controller;
   private static DrivetrainSubsystem instance;
   private double setpoint;
+
+  /*
+   * Talon FX integrated sensor has 2048 encoder units per shaft revolution
+   * motor-to-wheel gear ratio = ?
+   * wheel diameter = 6 inches
+   * wheel circumference = 6*PI inches
+   * Theoretical: pos_inches = pos_raw / 2048 / GearRatio * 6*PI = ___
+   * Empirical: We measured the robot going ___ inches when the encoder
+   *     reading increased by ___ -> pos_inches = pos_raw * __/__
+   */
+  double ENCODER_UNITS_PER_INCH = 1000.0;
 
   public static DrivetrainSubsystem get() {
     if (instance == null) {
@@ -64,19 +81,19 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 
     // Default rotation direction is counter-clockwise
     // Left motors are inverted, right motors are not
-    leftFront = new WPI_TalonFX(CANBusIDs.LEFT_FRONT_MOTOR);
-    leftFront.setInverted(true);
-    rightFront = new WPI_TalonFX(CANBusIDs.RIGHT_FRONT_MOTOR);
-    rightFront.setInverted(false);
-    leftRear = new WPI_TalonFX(CANBusIDs.LEFT_REAR_MOTOR);
-    leftRear.setInverted(true);
-    rightRear = new WPI_TalonFX(CANBusIDs.RIGHT_REAR_MOTOR);
-    rightRear.setInverted(false);
+    leftTop = new WPI_TalonFX(CANBusIDs.LEFT_TOP_MOTOR);
+    leftTop.setInverted(true);
+    rightTop = new WPI_TalonFX(CANBusIDs.RIGHT_TOP_MOTOR);
+    rightTop.setInverted(false);
+    leftBottom = new WPI_TalonFX(CANBusIDs.LEFT_BOTTOM_MOTOR);
+    leftBottom.setInverted(true);
+    rightBottom = new WPI_TalonFX(CANBusIDs.RIGHT_BOTTOM_MOTOR);
+    rightBottom.setInverted(false);
 
-    leftRear.follow(leftFront);
-    rightRear.follow(rightFront);
+    leftBottom.follow(leftTop);
+    rightBottom.follow(rightTop);
 
-    drive = new DifferentialDrive(leftFront, rightFront);
+    drive = new DifferentialDrive(leftTop, rightTop);
     disable();  // start in manual mode, not controlled by PID controller
 
     SmartDashboard.putNumber("LF Encoder Pos (Raw)", 0);
@@ -98,46 +115,36 @@ public class DrivetrainSubsystem extends PIDSubsystem {
 
   public void updateEncoderData() {
     // This method will be called once per scheduler run
-    lfEncPos = leftFront.getSelectedSensorPosition();
-    rfEncPos = rightFront.getSelectedSensorPosition();
-    lrEncPos = leftRear.getSelectedSensorPosition();
-    rrEncPos = rightRear.getSelectedSensorPosition();
-    avgEncoderPositionRaw = (lfEncPos + rfEncPos + lrEncPos + rrEncPos) / 4.0;
+    ltEncPos = leftTop.getSelectedSensorPosition();
+    rtEncPos = rightTop.getSelectedSensorPosition();
+    lbEncPos = leftBottom.getSelectedSensorPosition();
+    rbEncPos = rightBottom.getSelectedSensorPosition();
+    avgEncoderPositionRaw = (ltEncPos + rtEncPos + lbEncPos + rbEncPos) / 4.0;
 
-    /*
-     * Talon FX integrated sensor has 2048 encoder units per shaft revolution
-     * motor-to-wheel gear ratio = ?
-     * wheel diameter = 6 inches
-     * wheel circumference = 6*PI inches
-     * Theoretical: pos_inches = pos_raw / 2048 / GearRatio * 6*PI = ___
-     * Empirical: We measured the robot going ___ inches when the encoder
-     *     reading increased by ___ -> pos_inches = pos_raw * __/__
-     */
-    double encoderUnitsPerInch = 10865.0;
-    avgEncoderPositionInches = avgEncoderPositionRaw / encoderUnitsPerInch;
+    avgEncoderPositionInches = avgEncoderPositionRaw / ENCODER_UNITS_PER_INCH;
 
     avgEncoderVelocityRaw =
-      (leftFront.getSelectedSensorVelocity() +
-       rightFront.getSelectedSensorVelocity() +
-       leftRear.getSelectedSensorVelocity() +
-       rightRear.getSelectedSensorVelocity()) / 4.0;
+      (leftTop.getSelectedSensorVelocity() +
+       rightTop.getSelectedSensorVelocity() +
+       leftBottom.getSelectedSensorVelocity() +
+       rightBottom.getSelectedSensorVelocity()) / 4.0;
     /*
      * Raw encoder velocity is given in "encoder units per 100 ms"
      * To convert to inches per second:
      *    raw encoder velocity (enc units / tenths-of-second) *
      *      (10 tenths-of-second/sec) *
-     *      (1 inch / encoderUnitsPerInch enc units)
+     *      (1 inch / ENCODER_UNITS_PER_INCH enc units)
      *    = inches per second
-     * raw encoder velocity * 10 / encoderUnitsPerInch = inches/sec
-     * raw encoder velocity * 10 / encoderUnitsPerInch / 12 = feet/sec
+     * raw encoder velocity * 10 / ENCODER_UNITS_PER_INCH = inches/sec
+     * raw encoder velocity * 10 / ENCODER_UNITS_PER_INCH / 12 = feet/sec
      */
     avgEncoderVelocityFeetPerSec =
-      avgEncoderVelocityRaw * 10.0 / encoderUnitsPerInch / 12.0;
+      avgEncoderVelocityRaw * 10.0 / ENCODER_UNITS_PER_INCH / 12.0;
 
-    SmartDashboard.putNumber("LF Encoder Pos (Raw)", lfEncPos);
-    SmartDashboard.putNumber("RF Encoder Pos (Raw)", rfEncPos);
-    SmartDashboard.putNumber("LR Encoder Pos (Raw)", lrEncPos);
-    SmartDashboard.putNumber("RR Encoder Pos (Raw)", rrEncPos);
+    SmartDashboard.putNumber("LF Encoder Pos (Raw)", ltEncPos);
+    SmartDashboard.putNumber("RF Encoder Pos (Raw)", rtEncPos);
+    SmartDashboard.putNumber("LR Encoder Pos (Raw)", lbEncPos);
+    SmartDashboard.putNumber("RR Encoder Pos (Raw)", rbEncPos);
     SmartDashboard.putNumber("Avg Encoder Pos (Raw)", avgEncoderPositionRaw);
     SmartDashboard.putNumber("Avg Encoder Pos (Inches)", Math.round(10.0*avgEncoderPositionInches)/10.0);
     SmartDashboard.putNumber("Avg Encoder Speed (Raw)", avgEncoderVelocityRaw);
@@ -166,6 +173,10 @@ public class DrivetrainSubsystem extends PIDSubsystem {
     return cmd;
   }
 
+  public double inchesToEncoderUnits(double inches) {
+    return inches * ENCODER_UNITS_PER_INCH;
+  }
+
   /**
    * Factory method to produce a Command for driving in tele-operated mode.
    *
@@ -178,6 +189,7 @@ public class DrivetrainSubsystem extends PIDSubsystem {
   }
 
   public void driveWithJoysticks(CommandXboxController stick) {
+    DataLogManager.log("=== [DEBUG] teleop command invoked");
     double maxFwd = Drivetrain.MAX_FORWARD_SPEED;
     double maxTurn = Drivetrain.MAX_TURN_SPEED;
     // right trigger is forward, left trigger is reverse
@@ -205,10 +217,10 @@ public class DrivetrainSubsystem extends PIDSubsystem {
     } else {
       mode = NeutralMode.Brake;
     }
-    leftFront.setNeutralMode(mode);
-    rightFront.setNeutralMode(mode);
-    leftRear.setNeutralMode(mode);
-    rightRear.setNeutralMode(mode);
+    leftTop.setNeutralMode(mode);
+    rightTop.setNeutralMode(mode);
+    leftBottom.setNeutralMode(mode);
+    rightBottom.setNeutralMode(mode);
   }
 
   public void stop() {
@@ -219,6 +231,8 @@ public class DrivetrainSubsystem extends PIDSubsystem {
    * Method required for PID control as a PIDSubsystem subclass
    */
   public void useOutput(double value, double setpoint) {
+    // TODO: Make this method return to the position setpoint
+    // TODO: Make part 4 of the balancing command enable PID control
     driveStraightAtFixedRate(value);
   }
 
