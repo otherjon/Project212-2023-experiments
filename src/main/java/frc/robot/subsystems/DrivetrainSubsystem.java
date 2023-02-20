@@ -17,6 +17,8 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import static frc.robot.Constants.CANBusIDs;
 import static frc.robot.Constants.Drivetrain;
 import static frc.robot.Constants.ChargeStation;
+
+import frc.robot.RobotContainer;
 import frc.robot.commands.Balance1ApproachCS;
 import frc.robot.commands.Balance2DriveUpRamp;
 import frc.robot.commands.Balance3DriveForwardNInches;
@@ -90,6 +92,8 @@ public class DrivetrainSubsystem extends PIDSubsystem {
     SmartDashboard.putNumber("Avg Encoder Speed (Raw)", 0);
     SmartDashboard.putNumber("Avg Encoder Speed (Inches)", 0);
     SmartDashboard.putData("Drivetrain Subsystem", this);
+
+    setDefaultCommand(driveInTeleopModeCommand(this, RobotContainer.m_driverController));
   }
 
   public void updateEncoderData() {

@@ -28,7 +28,7 @@ public class RobotContainer {
   private final DrivetrainSubsystem m_drive = DrivetrainSubsystem.get();
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController m_driverController =
+  private final static CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
 
   // Command instances
