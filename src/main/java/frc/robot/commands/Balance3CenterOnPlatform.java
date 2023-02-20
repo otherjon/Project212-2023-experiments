@@ -38,7 +38,8 @@ public class Balance3CenterOnPlatform extends CommandBase {
     m_drive = drive;
     addRequirements(drive);    // declare subsystem dependencies
     encoderStartVal = drive.avgEncoderPositionInches();
-    encoderTargetVal = encoderStartVal + Constants.ChargeStation.INCHES_PAST_LEVELING * m_drive.ENCODER_UNITS_PER_INCH;
+    encoderTargetVal = encoderStartVal + m_drive.inchesToEncoderUnits(
+      Constants.ChargeStation.INCHES_PAST_LEVELING);
     DataLogManager.log("=== [DEBUG] instantiated Balance3CenterOnPlatform command");
   }
 

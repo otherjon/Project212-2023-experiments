@@ -169,6 +169,10 @@ public class DrivetrainSubsystem extends PIDSubsystem {
     return cmd;
   }
 
+  public double inchesToEncoderUnits(double inches) {
+    return inches * ENCODER_UNITS_PER_INCH;
+  }
+
   /**
    * Factory method to produce a Command for driving in tele-operated mode.
    *
