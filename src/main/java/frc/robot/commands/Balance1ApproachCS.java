@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj.DataLogManager;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.NavXSubsystem;
+import frc.robot.Constants;
 
 /** Balance on the Charging Station (CS): Part 1
  *
@@ -22,7 +23,7 @@ public class Balance1ApproachCS extends CommandBase {
   private final NavXSubsystem m_navx;
 
   /**
-   * Creates a new command.
+   * Constructor to build the new command.
    *
    * @param drive The DriveSubsystem used by this command.
    * @param navx The NavXSubsystem used by this command.
@@ -49,13 +50,14 @@ public class Balance1ApproachCS extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    DataLogManager.log("=== [DEBUG] pitch is now " + String.valueOf(m_navx.getPitch()));
     DataLogManager.log("=== [DEBUG] ended Balance1ApproachCS command");
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    // finished when we're tilted backward more than 5 degrees
-    return m_navx.getPitch() < -5.0;
+    // finished when we're sufficiently tilted backward
+    return m_navx.getPitch() < -Constants.ChargeStation.RAMP_PITCH_DEGREES;
   }
 }

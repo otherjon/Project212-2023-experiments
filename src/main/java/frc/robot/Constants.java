@@ -17,10 +17,10 @@ public final class Constants {
     public static final int kDriverControllerPort = 0;
   }
   public static class CANBusIDs {
-    public static final int LEFT_FRONT_MOTOR  = 1;
-    public static final int RIGHT_FRONT_MOTOR = 12;
-    public static final int LEFT_REAR_MOTOR   = 0;
-    public static final int RIGHT_REAR_MOTOR  = 15;
+    public static final int LEFT_TOP_MOTOR  = 1;
+    public static final int RIGHT_TOP_MOTOR = 12;
+    public static final int LEFT_BOTTOM_MOTOR   = 0;
+    public static final int RIGHT_BOTTOM_MOTOR  = 15;
   }
   public static class Drivetrain {
     public static final double MAX_FORWARD_SPEED = 0.8;
@@ -29,6 +29,9 @@ public final class Constants {
   public static class ChargeStation {
     // constants relating to the task of balancing on the charging station
     public static final double INCHES_PAST_LEVELING = 1.0;
+    public static final double RAMP_PITCH_DEGREES = 5.0;
+    public static final double RAMP_LEVEL_PITCH_DEGREES = 3.0;
+    public static final double DRIVE_SPEED = 0.3;
     public static final double kP = 0.4;
     public static final double kI = 0.0;
     public static final double kD = 0.0;

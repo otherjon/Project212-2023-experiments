@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj.DataLogManager;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.NavXSubsystem;
+import frc.robot.Constants;
 
 /** Balance on the Charging Station (CS): Part 2
  *
@@ -50,13 +51,16 @@ public class Balance2DriveUpRamp extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    DataLogManager.log("=== [DEBUG] pitch is now " + String.valueOf(m_navx.getPitch()));
     DataLogManager.log("=== [DEBUG] ended Balance2DriveUpRamp command");
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    // finished when we're minimally tilted front-to-back (within +- 3 degrees)
-    return (m_navx.getPitch() < 3.0 && m_navx.getPitch() > -3.0);
+    // finished when we're minimally tilted front-to-back (within tolerance)
+    double pitch = m_navx.getPitch();
+    double nearly_level = Constants.ChargeStation.RAMP_LEVEL_PITCH_DEGREES;
+    return (pitch < nearly_level && pitch > -nearly_level);
   }
 }
