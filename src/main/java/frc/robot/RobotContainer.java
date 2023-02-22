@@ -5,7 +5,7 @@
 package frc.robot;
 
 import frc.robot.subsystems.GitInfoSubsystem;
-import frc.robot.subsystems.LEDSubsystem;
+import frc.robot.subsystems.BinarySensorSubsystem;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -19,13 +19,14 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final GitInfoSubsystem m_gitInfo = new GitInfoSubsystem();
-  private final int LED_CONTROLLER_PWM_PORT = 0;
+  private final int SENSOR_DIO_PORT = 0;
 
-  private final LEDSubsystem m_leds = new LEDSubsystem(LED_CONTROLLER_PWM_PORT);
+  private final BinarySensorSubsystem m_sensor = new BinarySensorSubsystem(SENSOR_DIO_PORT);
 
   // Command instances
-  private final Command autoCmd = m_leds.doNothingCommand();
-  private final Command teleopCmd = m_leds.doNothingCommand();
+  private final Command doNothingCmd = new InstantCommand(() -> {});
+  private final Command autoCmd = doNothingCommand;
+  private final Command teleopCmd = doNothingCommand;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
