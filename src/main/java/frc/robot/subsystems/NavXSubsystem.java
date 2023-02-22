@@ -66,8 +66,11 @@ public class NavXSubsystem extends SubsystemBase {
     accel_y = navx.getWorldLinearAccelY();
     accel_z = navx.getWorldLinearAccelZ();
     yaw = navx.getYaw();
-    pitch = navx.getPitch();
-    roll = navx.getRoll();
+
+    // Rockstar's RoboRIO is mounted upside down and rotated 90 degrees.
+    // Actual pitch is measured roll, etc.
+    pitch = navx.getRoll();
+    roll = navx.getPitch();
   }
 
   private void updateDashboard() {
